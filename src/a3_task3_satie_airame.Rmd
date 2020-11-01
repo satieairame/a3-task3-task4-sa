@@ -1,0 +1,91 @@
+---
+title: "a3_task3_satie_airame.Rmd"
+author: "Satie Airame"
+date: "11/1/2020"
+output: html_document
+---
+
+## Santa Barbara Urchins
+
+### Data: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(here)
+library(janitor)
+library(lubridate)
+```
+
+Read in the urchin.csv data and convert to lower_snake_case.
+
+```{r}
+urchins <- read_csv(here("data", "urchins.csv")) %>% 
+  clean_names()
+```
+
+#### Compare the distribution of sizes between purple and red urchins using faceted histogram and boxplot.
+
+```{r}
+ggplot(data = urchins, aes(x = size)) +
+  geom_histogram(bins = 15) + 
+  facet_wrap(~common_name)
+```
+
+#### Purple urchins demonstrate a slightly positively skewed size distribution (measured as diameter in cm). Red urchins demonstrate a normal distribution with slightly larger sizes than purple urchins.
+
+```{r}
+ggplot(data = urchins, aes(x = common_name, y = size)) +
+  geom_boxplot()
+
+```
+
+#### The average diameter of purple urchins is smaller than red urchins. The standard deviation of diameter for red urchins is greater than for purple urchins.
+
+#### Create a summary table of mean, median, standard deviation, and sample size of diameters of purple urchins and red urchins.
+
+```{r}
+urchin_stats <- urchins %>% 
+  group_by(common_name) %>% 
+  summarize(mean_size = mean(size), 
+            median_size = median(size), 
+            sd_size = sd(size), 
+            n = n())
+urchin_stats
+```
+
+#### The mean and median diameter of purple urchins is 4.5 cm (sd = 1.2). The mean size of red urchins is 6.8 cm and the median is 7.0 cm (sd = 2.0). The difference between mean urchin sizes is 2.3 cm.
+
+### Filter purple_urchins, convert data to class "Date", create new column "year", create new column "site_full" with full name of sites.
+
+```{r}
+purple_urchins <- urchins %>% 
+  filter(common_name == "Purple Urchin") %>%
+  mutate(date_new = mdy(date)) %>% 
+  mutate(year_new = year(date_new)) %>%
+  mutate(site_full = case_when(
+    site == "NAPL" ~ "Naples Reef",
+    site == "AQUE" ~ "Arroyo Quemado Reef",
+    site == "CARP" ~ "Carpinteria Reef",
+    site == "MOHK" ~ "Mohawk Reef",
+    site == "IVEE" ~ "Isla Vista Reef"))
+
+```
+
+### Create summary table of total number purple urchins observed by site and year_new.
+
+```{r}
+purple_urchins_stats <- purple_urchins %>%
+  count(site,year_new)
+purple_urchins_stats
+```
+
+### Make exploratory graph of counts of purple urchins recorded at each site over time for the years in the study.
+
+```{r}
+ggplot(data = purple_urchins_stats, aes(x=year_new, y=n))+
+  geom_line(aes(color = site))
+```
+
+#### The number of purple urchins at different sites over time. Urchins at all sites declined sinc 2008 and exhibited steep declines in 2011-2012 and 2019-2020.
