@@ -85,7 +85,8 @@ purple_urchins_stats
 
 ```{r}
 ggplot(data = purple_urchins_stats, aes(x=year_new, y=n))+
-  geom_line(aes(color = site))
+  geom_line(aes(color = site))+
+  geom_point(aes(color = site))
 ```
 
 #### The number of purple urchins at different sites over time. Urchins at all sites declined sinc 2008 and exhibited steep declines in 2011-2012 and 2019-2020.

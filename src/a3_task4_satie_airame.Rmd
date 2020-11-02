@@ -1,0 +1,94 @@
+---
+title: "a3_task4_satie_airame.Rmd"
+author: "Satie Airame"
+date: "11/1/2020"
+output: html_document
+---
+
+## Santa Barbara Urchins
+
+### Data: Reed, D. 2020. SBC LTER: Reef: Long-term experiment: Kelp removal: Urchin size frequency distribution ver 20. Environmental Data Initiative. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(here)
+library(janitor)
+library(lubridate)
+library(ggplot2)
+library(readr)
+```
+
+Read in the urchin.csv data and convert to lower_snake_case.
+
+```{r}
+urchins <- read_csv(here("data", "urchins.csv")) %>% 
+  clean_names()
+```
+
+### Filter data to Naples Reef observations for purple urchins observed in January 2010.
+
+```{r}
+purple_urchins <- urchins %>% 
+  filter(common_name == "Purple Urchin") %>%
+  mutate(date_new = mdy(date)) %>% 
+  mutate(year_new = year(date_new)) %>%
+  mutate(month_new = month(date_new))
+purple_urchins_jan2010 <- purple_urchins %>% 
+  filter(year_new == "2010", month_new == "1")
+```
+
+### Use histograms and qq-plots for the size distribution of each of the treatments (control and annual).
+
+```{r}
+ggplot(data = purple_urchins_jan2010, aes(x = size)) +
+  geom_histogram() +
+  facet_wrap(~treatment)
+```
+
+#### The size distributions of purple urchins in January 2010 are normally distributed in annual and control treatments.
+
+```{r}
+ggplot(data = purple_urchins_jan2010, aes(sample = size)) +
+  geom_qq()+
+  facet_wrap(~treatment)
+```
+
+#### The size distributions of purple urchins in January 2010 are normally distributed in annual and control treatments.
+
+### Create a table of descriptive statistics including mean, st dev and sample size.
+
+```{r}
+purple_urchins_jan2010_stats <- purple_urchins_jan2010 %>%
+  group_by(treatment) %>%
+  summarize(mean_size = mean(size), 
+            sd_size = sd(size), 
+            n = n())
+purple_urchins_jan2010_stats
+```
+
+### Perform a t-test to explore differences between annual and control treatments.
+
+```{r}
+
+annual <- purple_urchins_jan2010 %>% 
+  filter(treatment == "ANNUAL") %>% 
+  pull(size)
+
+control <- purple_urchins_jan2010 %>% 
+  filter(treatment == "CONTROL") %>% 
+  pull(size)
+```
+
+### 5. Then run a two-sample t-test with those vectors as the inputs
+
+```{r}
+t.test(annual, control)
+```
+
+#### The mean size of purple urchins in Jaunary 2010 was 4.45 cm for the treatment when kelp was removed from the the site annually and 4.23 cm in control sites that were not treated. In comparing the two treatments with a Welch Two-sample t-test, the p-value is 0.14. This indicates that the probability that, if these samples are drawn from populations with the same mean size (the null hypothesis), then there is a 14.4% chance that the sample means could be at least as different two ramdom samples from the population.
+
+
+
+
