@@ -89,6 +89,6 @@ t.test(annual, control)
 
 #### The mean size of purple urchins in Jaunary 2010 was 4.45 cm for the treatment when kelp was removed from the the site annually and 4.23 cm in control sites that were not treated. In comparing the two treatments with a Welch Two-sample t-test, the p-value is 0.14. This indicates that the probability that, if these samples are drawn from populations with the same mean size (the null hypothesis), then there is a 14.4% chance that the sample means could be at least as different two ramdom samples from the population.
 
-
+### End task 4
 
 
